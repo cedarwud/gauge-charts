@@ -10,7 +10,7 @@ import "../assets/css/dashboard.css";
 import awr1642Image from "../assets/images/radar.jpg";
 import usrpB210Image from "../assets/images/usrp.jpg";
 
-const SOCKET_SERVER_URL = "https://gauge-chart.onrender.com";
+const SOCKET_SERVER_URL = "https://gauge-charts.onrender.com";
 
 interface DeviceData {
   voltage: number;
