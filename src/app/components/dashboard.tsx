@@ -10,7 +10,8 @@ import "../assets/css/dashboard.css";
 import awr1642Image from "../assets/images/radar.jpg";
 import usrpB210Image from "../assets/images/usrp.jpg";
 
-const SOCKET_SERVER_URL = "https://gauge-charts.onrender.com";
+const SOCKET_SERVER_URL = "http://localhost:3000";
+// const SOCKET_SERVER_URL = "https://gauge-charts.onrender.com";
 
 interface DeviceData {
   voltage: number;
@@ -45,12 +46,32 @@ const Dashboard: React.FC = () => {
     const { radarData, usrpData } = data;
 
     setRadarData((prevData) => {
+      const radarAccPowerPercent =
+        ((prevData.accumulatedPower + radarData.power) / 4000) * 0.01;
+      const newRadarAccPowerPercent =
+        radarAccPowerPercent > 1
+          ? 1
+          : radarAccPowerPercent < 0
+          ? 0.05
+          : radarAccPowerPercent;
+      setRadarAccPowerPercent(newRadarAccPowerPercent);
+
       return {
         ...radarData,
         accumulatedPower: prevData.accumulatedPower + radarData.power,
       };
     });
     setUsrpData((prevData) => {
+      const usrpAccPowerPercent =
+        ((prevData.accumulatedPower + usrpData.power) / 1900) * 0.01;
+      const newUsrpAccPowerPercent =
+        usrpAccPowerPercent > 1
+          ? 1
+          : usrpAccPowerPercent < 0
+          ? 0.05
+          : usrpAccPowerPercent;
+      setUsrpAccPowerPercent(newUsrpAccPowerPercent);
+
       return {
         ...usrpData,
         accumulatedPower: prevData.accumulatedPower + usrpData.power,
@@ -70,26 +91,6 @@ const Dashboard: React.FC = () => {
     const newUsrpPowerPercent =
       usrpPowerPercent > 1 ? 1 : usrpPowerPercent < 0 ? 0.05 : usrpPowerPercent;
     setUsrpPowerPercent(newUsrpPowerPercent);
-
-    const radarAccPowerPercent =
-      ((radarData.accumulatedPower + radarData.power) / 2800) * 0.01;
-    const newRadarAccPowerPercent =
-      radarAccPowerPercent > 1
-        ? 1
-        : radarAccPowerPercent < 0
-        ? 0.05
-        : radarAccPowerPercent;
-    setRadarAccPowerPercent(newRadarAccPowerPercent);
-
-    const usrpAccPowerPercent =
-      ((usrpData.accumulatedPower + usrpData.power) / 1940) * 0.01;
-    const newUsrpAccPowerPercent =
-      usrpAccPowerPercent > 1
-        ? 1
-        : usrpAccPowerPercent < 0
-        ? 0.05
-        : usrpAccPowerPercent;
-    setUsrpAccPowerPercent(newUsrpAccPowerPercent);
 
     const totalAccPowerPercent =
       (radarAccPowerPercent + usrpAccPowerPercent) / 3;
@@ -186,7 +187,7 @@ const Dashboard: React.FC = () => {
             arcsLength={[0.2, 0.4, 0.4]} // Adjust arcs to represent safe, moderate, and high current ranges
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for mid, Red for high
             percent={
-              radarData.current / 3000 > 1 ? 1 : radarData.current / 3000
+              radarData.current / 5000 > 1 ? 1 : radarData.current / 5000
             } // Use the calculated percentage value for the gauge
             formatTextValue={() => `${radarData.current?.toFixed(2) || 0} mA`} // Display the actual current value
             needleColor="#464A4F"
@@ -204,7 +205,7 @@ const Dashboard: React.FC = () => {
             nrOfLevels={100}
             arcsLength={[0.3, 0.4, 0.3]} // Adjust arcs for low, medium, and high power consumption
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for medium, Red for high
-            percent={radarData.power / 10000 > 1 ? 1 : radarData.power / 10000} // Use the calculated percentage value for the gauge
+            percent={radarData.power / 16000 > 1 ? 1 : radarData.power / 16000} // Use the calculated percentage value for the gauge
             formatTextValue={() => `${radarData.power?.toFixed(2) || 0} mW`} // Display the actual power consumption value
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
@@ -305,7 +306,7 @@ const Dashboard: React.FC = () => {
         </div>
         <div className="chart-card">
           <h2>
-            <i className="fas fa-plug"></i> Total Accumulated Power Consumption
+            <i className="fas fa-plug"></i> Total Power Consumption
           </h2>
           <GaugeChart
             id="total-power"
