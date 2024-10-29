@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
         ((prevData.accumulatedPower + radarData.power) / 4000) * 0.01;
       const newRadarAccPowerPercent =
         radarAccPowerPercent > 1
-          ? 1
+          ? 0.95
           : radarAccPowerPercent < 0
           ? 0.05
           : radarAccPowerPercent;
@@ -66,7 +66,7 @@ const Dashboard: React.FC = () => {
         ((prevData.accumulatedPower + usrpData.power) / 1900) * 0.01;
       const newUsrpAccPowerPercent =
         usrpAccPowerPercent > 1
-          ? 1
+          ? 0.95
           : usrpAccPowerPercent < 0
           ? 0.05
           : usrpAccPowerPercent;
@@ -81,7 +81,7 @@ const Dashboard: React.FC = () => {
     const usrpCurrentPercent = (usrpData.current - 380) * 0.0075;
     const newUsrpCurrentPercent =
       usrpCurrentPercent > 1
-        ? 1
+        ? 0.95
         : usrpCurrentPercent < 0
         ? 0.05
         : usrpCurrentPercent;
@@ -89,14 +89,18 @@ const Dashboard: React.FC = () => {
 
     const usrpPowerPercent = (usrpData.power - 1900) * 0.0015;
     const newUsrpPowerPercent =
-      usrpPowerPercent > 1 ? 1 : usrpPowerPercent < 0 ? 0.05 : usrpPowerPercent;
+      usrpPowerPercent > 1
+        ? 0.95
+        : usrpPowerPercent < 0
+        ? 0.05
+        : usrpPowerPercent;
     setUsrpPowerPercent(newUsrpPowerPercent);
 
     const totalAccPowerPercent =
       (radarAccPowerPercent + usrpAccPowerPercent) / 3;
     const newTotalAccPowerPercent =
       totalAccPowerPercent > 1
-        ? 1
+        ? 0.95
         : totalAccPowerPercent < 0
         ? 0.05
         : totalAccPowerPercent;
@@ -187,7 +191,7 @@ const Dashboard: React.FC = () => {
             arcsLength={[0.2, 0.4, 0.4]} // Adjust arcs to represent safe, moderate, and high current ranges
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for mid, Red for high
             percent={
-              radarData.current / 5000 > 1 ? 1 : radarData.current / 5000
+              radarData.current / 5000 > 1 ? 0.95 : radarData.current / 5000
             } // Use the calculated percentage value for the gauge
             formatTextValue={() => `${radarData.current?.toFixed(2) || 0} mA`} // Display the actual current value
             needleColor="#464A4F"
@@ -205,7 +209,9 @@ const Dashboard: React.FC = () => {
             nrOfLevels={100}
             arcsLength={[0.3, 0.4, 0.3]} // Adjust arcs for low, medium, and high power consumption
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for medium, Red for high
-            percent={radarData.power / 16000 > 1 ? 1 : radarData.power / 16000} // Use the calculated percentage value for the gauge
+            percent={
+              radarData.power / 16000 > 1 ? 0.95 : radarData.power / 16000
+            } // Use the calculated percentage value for the gauge
             formatTextValue={() => `${radarData.power?.toFixed(2) || 0} mW`} // Display the actual power consumption value
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
