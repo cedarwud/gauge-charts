@@ -20,15 +20,12 @@ interface DeviceData {
 }
 
 const Dashboard: React.FC = () => {
-  const [maxRadarVoltage, setMaxRadarVoltage] = useState(15);
-  const [maxRadarCurrent, setMaxRadarCurrent] = useState(1000);
-  const [maxRadarPower, setMaxRadarPower] = useState(10000);
-  const [maxUsrpVoltage, setMaxUsrpVoltage] = useState(15);
-  const [maxUsrpCurrent, setMaxUsrpCurrent] = useState(1000);
-  const [maxUsrpPower, setMaxUsrpPower] = useState(10000);
-  const [maxRadarAccPower, setMaxRadarAccPower] = useState(100);
-  const [maxUsrpAccPower, setMaxUsrpAccPower] = useState(100);
-  const [maxTotalAccPower, setMaxTotalAccPower] = useState(100);
+  const maxVoltage = 15;
+  const [usrpCurrentPercent, setUsrpCurrentPercent] = useState(0.05);
+  const [usrpPowerPercent, setUsrpPowerPercent] = useState(0.05);
+  const [radarAccPowerPercent, setRadarAccPowerPercent] = useState(0.05);
+  const [usrpAccPowerPercent, setUsrpAccPowerPercent] = useState(0.05);
+  const [totalAccPowerPercent, setTotalAccPowerPercent] = useState(0.05);
 
   const [radarData, setRadarData] = useState<DeviceData>({
     voltage: 0,
@@ -44,9 +41,66 @@ const Dashboard: React.FC = () => {
     accumulatedPower: 0,
   });
 
-  const [radarAccPower, setRadarAccPower] = useState<number>(0);
-  const [usrpAccPower, setUsrpAccPower] = useState<number>(0);
-  const [totalPower, setTotalPower] = useState<number>(0);
+  const handleNewData = debounce((data) => {
+    const { radarData, usrpData } = data;
+
+    setRadarData((prevData) => {
+      return {
+        ...radarData,
+        accumulatedPower: prevData.accumulatedPower + radarData.power,
+      };
+    });
+    setUsrpData((prevData) => {
+      return {
+        ...usrpData,
+        accumulatedPower: prevData.accumulatedPower + usrpData.power,
+      };
+    });
+
+    const usrpCurrentPercent = (usrpData.current - 380) * 0.0075;
+    const newUsrpCurrentPercent =
+      usrpCurrentPercent > 1
+        ? 1
+        : usrpCurrentPercent < 0
+        ? 0.05
+        : usrpCurrentPercent;
+    setUsrpCurrentPercent(newUsrpCurrentPercent);
+
+    const usrpPowerPercent = (usrpData.power - 1900) * 0.0015;
+    const newUsrpPowerPercent =
+      usrpPowerPercent > 1 ? 1 : usrpPowerPercent < 0 ? 0.05 : usrpPowerPercent;
+    setUsrpPowerPercent(newUsrpPowerPercent);
+
+    const radarAccPowerPercent =
+      ((radarData.accumulatedPower + radarData.power) / 2800) * 0.01;
+    const newRadarAccPowerPercent =
+      radarAccPowerPercent > 1
+        ? 1
+        : radarAccPowerPercent < 0
+        ? 0.05
+        : radarAccPowerPercent;
+    setRadarAccPowerPercent(newRadarAccPowerPercent);
+
+    const usrpAccPowerPercent =
+      ((usrpData.accumulatedPower + usrpData.power) / 1940) * 0.01;
+    const newUsrpAccPowerPercent =
+      usrpAccPowerPercent > 1
+        ? 1
+        : usrpAccPowerPercent < 0
+        ? 0.05
+        : usrpAccPowerPercent;
+    setUsrpAccPowerPercent(newUsrpAccPowerPercent);
+
+    const totalAccPowerPercent =
+      (radarAccPowerPercent + usrpAccPowerPercent) / 3;
+    const newTotalAccPowerPercent =
+      totalAccPowerPercent > 1
+        ? 1
+        : totalAccPowerPercent < 0
+        ? 0.05
+        : totalAccPowerPercent;
+    setTotalAccPowerPercent(newTotalAccPowerPercent);
+  }, 1000);
 
   useEffect(() => {
     // Use environment variable for the server URL, falling back to localhost for local development
@@ -64,42 +118,6 @@ const Dashboard: React.FC = () => {
       console.error("Socket error:", err.message);
     });
 
-    const handleNewData = debounce((data) => {
-      setRadarData(data.radarData);
-      setUsrpData(data.usrpData);
-      setRadarAccPower((prevData) => prevData + data.radarData.power);
-      setUsrpAccPower((prevData) => prevData + data.usrpData.power);
-      setTotalPower((prevData) => prevData + data.totalPower);
-
-      setMaxRadarVoltage((prevData) =>
-        data.radarData.voltage > prevData ? data.radarData.voltage : prevData
-      );
-      setMaxRadarCurrent((prevData) =>
-        data.radarData.current > prevData ? data.radarData.current : prevData
-      );
-      setMaxRadarPower((prevData) =>
-        data.radarData.power > prevData ? data.radarData.power : prevData
-      );
-      setMaxUsrpVoltage((prevData) =>
-        data.usrpData.voltage > prevData ? data.usrpData.voltage : prevData
-      );
-      setMaxUsrpCurrent((prevData) =>
-        data.usrpData.current > prevData ? data.usrpData.current : prevData
-      );
-      setMaxUsrpPower((prevData) =>
-        data.usrpData.power > prevData ? data.usrpData.power : prevData
-      );
-      setMaxRadarAccPower((prevData) =>
-        radarAccPower > prevData ? radarAccPower : prevData
-      );
-      setMaxUsrpAccPower((prevData) =>
-        usrpAccPower > prevData ? usrpAccPower : prevData
-      );
-      setMaxTotalAccPower((prevData) =>
-        totalPower > prevData ? totalPower : prevData
-      );
-    }, 1000);
-
     // socket.on("newData", handleNewData);
 
     socket.on("newData", (receivedData) => {
@@ -111,7 +129,7 @@ const Dashboard: React.FC = () => {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [radarData, usrpData]);
 
   return (
     <div className="dashboard-container">
@@ -147,11 +165,11 @@ const Dashboard: React.FC = () => {
           </h2>
           <GaugeChart
             id="radarData-voltage"
-            nrOfLevels={50}
+            nrOfLevels={100}
             arcsLength={[0.2, 0.3, 0.5]} // Split into segments as needed
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green, Yellow, Red
-            percent={radarData.voltage / maxRadarVoltage} // Still using a percentage for fill
-            formatTextValue={() => `${radarData.voltage.toFixed(2)} V`} // Show real value as text
+            percent={radarData.voltage / maxVoltage} // Still using a percentage for fill
+            formatTextValue={() => `${radarData.voltage?.toFixed(2) || 0} V`} // Show real value as text
             textColor="#000000"
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
@@ -164,11 +182,13 @@ const Dashboard: React.FC = () => {
           </h2>
           <GaugeChart
             id="radarData-current"
-            nrOfLevels={50}
+            nrOfLevels={100}
             arcsLength={[0.2, 0.4, 0.4]} // Adjust arcs to represent safe, moderate, and high current ranges
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for mid, Red for high
-            percent={radarData.current / maxRadarCurrent} // Use the calculated percentage value for the gauge
-            formatTextValue={() => `${radarData.current.toFixed(2)} mA`} // Display the actual current value
+            percent={
+              radarData.current / 3000 > 1 ? 1 : radarData.current / 3000
+            } // Use the calculated percentage value for the gauge
+            formatTextValue={() => `${radarData.current?.toFixed(2) || 0} mA`} // Display the actual current value
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
             textColor="#000000"
@@ -181,11 +201,11 @@ const Dashboard: React.FC = () => {
           </h2>
           <GaugeChart
             id="radarData-power"
-            nrOfLevels={50}
+            nrOfLevels={100}
             arcsLength={[0.3, 0.4, 0.3]} // Adjust arcs for low, medium, and high power consumption
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for medium, Red for high
-            percent={radarData.power / maxRadarPower} // Use the calculated percentage value for the gauge
-            formatTextValue={() => `${radarData.power.toFixed(2)} mW`} // Display the actual power consumption value
+            percent={radarData.power / 10000 > 1 ? 1 : radarData.power / 10000} // Use the calculated percentage value for the gauge
+            formatTextValue={() => `${radarData.power?.toFixed(2) || 0} mW`} // Display the actual power consumption value
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
             textColor="#000000"
@@ -198,11 +218,11 @@ const Dashboard: React.FC = () => {
           </h2>
           <GaugeChart
             id="usrpData-voltage"
-            nrOfLevels={50}
+            nrOfLevels={100}
             arcsLength={[0.2, 0.3, 0.5]} // Split into segments as needed
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green, Yellow, Red
-            percent={usrpData.voltage / maxUsrpVoltage} // Still using a percentage for fill
-            formatTextValue={() => `${usrpData.voltage.toFixed(2)} V`} // Show real value as text
+            percent={usrpData.voltage / maxVoltage} // Still using a percentage for fill
+            formatTextValue={() => `${usrpData.voltage?.toFixed(2) || 0} V`} // Show real value as text
             textColor="#000000"
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
@@ -215,11 +235,12 @@ const Dashboard: React.FC = () => {
           </h2>
           <GaugeChart
             id="usrpData-current"
-            nrOfLevels={50}
+            nrOfLevels={100}
             arcsLength={[0.2, 0.4, 0.4]} // Adjust arcs to represent safe, moderate, and high current ranges
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for mid, Red for high
-            percent={usrpData.current / maxUsrpCurrent} // Use the calculated percentage value for the gauge
-            formatTextValue={() => `${usrpData.current.toFixed(2)} mA`} // Display the actual current value
+            percent={usrpCurrentPercent} // Use the calculated percentage value for the gauge
+            // percent={usrpData.current / maxUsrpCurrent} // Use the calculated percentage value for the gauge
+            formatTextValue={() => `${usrpData.current?.toFixed(2) || 0} mA`} // Display the actual current value
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
             textColor="#000000"
@@ -232,11 +253,11 @@ const Dashboard: React.FC = () => {
           </h2>
           <GaugeChart
             id="usrpData-power"
-            nrOfLevels={50}
+            nrOfLevels={100}
             arcsLength={[0.3, 0.4, 0.3]} // Adjust arcs for low, medium, and high power consumption
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for medium, Red for high
-            percent={usrpData.power / maxUsrpPower} // Use the calculated percentage value for the gauge
-            formatTextValue={() => `${usrpData.power.toFixed(2)} mW`} // Display the actual power consumption value
+            percent={usrpPowerPercent} // Use the calculated percentage value for the gauge
+            formatTextValue={() => `${usrpData.power?.toFixed(2) || 0} mW`} // Display the actual power consumption value
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
             textColor="#000000"
@@ -249,11 +270,14 @@ const Dashboard: React.FC = () => {
           </h2>
           <GaugeChart
             id="radarData-accumulated"
-            nrOfLevels={50}
+            nrOfLevels={100}
             arcsLength={[0.3, 0.4, 0.3]} // Adjust arcs for low, medium, and high power consumption
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for medium, Red for high
-            percent={radarAccPower / 1000 / maxRadarAccPower} // Use the calculated percentage value for the gauge
-            formatTextValue={() => `${(radarAccPower / 1000).toFixed(2)} W`} // Display the actual power consumption value
+            percent={radarAccPowerPercent} // Use the calculated percentage value for the gauge
+            // percent={radarAccPower / 1000 / maxRadarAccPower} // Use the calculated percentage value for the gauge
+            formatTextValue={() =>
+              `${(radarData.accumulatedPower / 1000)?.toFixed(2) || 0} W`
+            } // Display the actual power consumption value
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
             textColor="#000000"
@@ -266,11 +290,13 @@ const Dashboard: React.FC = () => {
           </h2>
           <GaugeChart
             id="usrpData-accumulated"
-            nrOfLevels={50}
+            nrOfLevels={100}
             arcsLength={[0.3, 0.4, 0.3]} // Adjust arcs for low, medium, and high power consumption
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for medium, Red for high
-            percent={usrpAccPower / 1000 / maxUsrpAccPower} // Use the calculated percentage value for the gauge
-            formatTextValue={() => `${(usrpAccPower / 1000).toFixed(2)} W`} // Display the actual power consumption value
+            percent={usrpAccPowerPercent} // Use the calculated percentage value for the gauge
+            formatTextValue={() =>
+              `${(usrpData.accumulatedPower / 1000)?.toFixed(2) || 0} W`
+            } // Display the actual power consumption value
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
             textColor="#000000"
@@ -283,32 +309,17 @@ const Dashboard: React.FC = () => {
           </h2>
           <GaugeChart
             id="total-power"
-            nrOfLevels={50}
+            nrOfLevels={100}
             arcsLength={[0.3, 0.4, 0.3]} // Adjust arcs for low, medium, and high power consumption
             colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for medium, Red for high
-            percent={totalPower / 1000 / maxTotalAccPower} // Use the calculated percentage value for the gauge
-            formatTextValue={() => `${(totalPower / 1000).toFixed(2)} W`} // Display the actual power consumption value
-            needleColor="#464A4F"
-            needleBaseColor="#464A4F"
-            textColor="#000000"
-            animate={false}
-          />
-        </div>
-        <div className="chart-card">
-          <h2>
-            <i className="fas fa-plug"></i> Total Power Consumption
-          </h2>
-          <GaugeChart
-            id="total-power"
-            nrOfLevels={50}
-            arcsLength={[0.3, 0.4, 0.3]} // Adjust arcs for low, medium, and high power consumption
-            colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for medium, Red for high
-            percent={
-              (radarData.power + usrpData.power) /
-              (maxRadarPower + maxUsrpPower)
-            } // Use the calculated percentage value for the gauge
+            percent={totalAccPowerPercent} // Use the calculated percentage value for the gauge
             formatTextValue={() =>
-              `${(radarData.power + usrpData.power).toFixed(2)} mW`
+              `${
+                (
+                  (radarData.accumulatedPower + usrpData.accumulatedPower) /
+                  1000
+                )?.toFixed(2) || 0
+              } W`
             } // Display the actual power consumption value
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
