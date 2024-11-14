@@ -38,8 +38,8 @@ const Dashboard: React.FC = () => {
 
   const [usrpData, setUsrpData] = useState<DeviceData>({
     voltage: 5.01,
-    current: 387.58,
-    power: 1941.78,
+    current: 500.58,
+    power: 2502.9,
     accumulatedPower: 0,
   });
 
@@ -47,6 +47,7 @@ const Dashboard: React.FC = () => {
     const newUsrpData = {
       ...usrpData,
       current: usrpData.current + amount,
+      power:usrpData.power + amount * 5.01,
     };
     handleNewData(newUsrpData); // Update state with the received data
   };
@@ -72,7 +73,7 @@ const Dashboard: React.FC = () => {
     });
 
     const usrpCurrentPercent =
-      (usrpData.current + usrpCurrentOffset - 380) * 0.0075;
+      (usrpData.current + usrpCurrentOffset - 500)  / 100;
     const newUsrpCurrentPercent =
       usrpCurrentPercent > 1
         ? 0.95
@@ -81,7 +82,7 @@ const Dashboard: React.FC = () => {
         : usrpCurrentPercent;
     setUsrpCurrentPercent(newUsrpCurrentPercent);
 
-    const usrpPowerPercent = (usrpData.power - 1900) * 0.0015;
+    const usrpPowerPercent = (usrpData.power - 2500) / 500;
     const newUsrpPowerPercent =
       usrpPowerPercent > 1
         ? 0.95

@@ -78,7 +78,7 @@ const Dashboard: React.FC = () => {
       };
     });
 
-    const usrpCurrentPercent = (usrpData.current - 380) * 0.0075;
+    const usrpCurrentPercent = (usrpData.current - 500) / 100;
     const newUsrpCurrentPercent =
       usrpCurrentPercent > 1
         ? 0.95
@@ -87,7 +87,7 @@ const Dashboard: React.FC = () => {
         : usrpCurrentPercent;
     setUsrpCurrentPercent(newUsrpCurrentPercent);
 
-    const usrpPowerPercent = (usrpData.power - 1900) * 0.0015;
+    const usrpPowerPercent = (usrpData.power - 2500) / 500;
     const newUsrpPowerPercent =
       usrpPowerPercent > 1
         ? 0.95
