@@ -1,82 +1,140 @@
-/* General Reset */
-/* * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+.base-station-root {
+  display: flex;
+}
+
+.base-station-road {
+  position: relative;
+  width: 260px;
+  background-color: #fff;
+}
+
+.car-road {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+}
+
+.base-station {
+  position: absolute;
+  left: 30px;
+  bottom: 0;
+  width: 200px;
+  height: 270px;
+  z-index: 2;
+}
+
+/* Base view */
+.base-station-body {
+  position: absolute;
+  width: 160px;
+  height: 208px;
+  transform: translateX(0%) translateY(30%);
+  background-image: url("../images/base-station.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 10;
+}
+
+.base-station {
+  --gain-percentage: 0%;
+}
+
+/* Update power-left with mirrored radial animation */
+.base-station .power-left {
+  position: absolute;
+  bottom: 0;
+  bottom: 50%;
+  width: 149px;
+  height: 157px;
+  transform: translateX(-37%) translateY(15%)
+    scale(calc(var(--gain-percentage)));
+  background-image: url("../images/power-left.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 1;
+  clip-path: circle(calc(var(--gain-percentage)) at right center);
+  opacity: calc(var(--gain-percentage));
+  transition: clip-path 0.3s ease;
+}
+
+/* Update power-right with radial animation */
+.base-station .power-right {
+  position: absolute;
+  bottom: 0;
+  bottom: 50%;
+  width: 149px;
+  height: 157px;
+  transform: translateX(45%) translateY(12%) scale(calc(var(--gain-percentage)));
+  background-image: url("../images/power-right.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 1;
+  clip-path: circle(calc(var(--gain-percentage)) at left center);
+  opacity: calc(var(--gain-percentage));
+  transition: clip-path 0.3s ease;
+}
+
+/* Car */
+.car {
+  position: absolute;
+  bottom: 30px;
+  display: flex;
+  align-items: center;
+  left: var(--car-position, 0%); /* Add CSS variable for position */
+  transition: left 1s linear; /* Smooth transition */
+}
+
+/* Car Body */
+.car-body {
+  width: 120px; /* Increased from 80px */
+  height: 60px; /* Increased from 40px */
+  background-color: #007bff;
+  border-radius: 15px 15px 0 0; /* Increased radius */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 20px; /* Increased from 12px */
+  font-weight: bold;
+  text-align: center;
+  padding: 8px; /* Increased padding */
+}
+
+/* Wheels */
+.wheel {
+  width: 30px; /* Increased from 20px */
+  height: 30px; /* Increased from 20px */
+  background-color: #555;
+  border-radius: 50%;
+  position: absolute;
+  bottom: -15px; /* Adjusted for larger wheels */
+}
+
+/* Front Wheel */
+.front-wheel {
+  right: 10px;
+  animation: wheel-spin 0.5s linear infinite;
+}
+
+/* Back Wheel */
+.back-wheel {
+  left: 10px;
+  animation: wheel-spin 0.5s linear infinite;
+}
+
+/* Wheel Rotation */
+@keyframes wheel-spin {
+  0% {
+    transform: rotate(0deg);
   }
-   */
-  /* body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f0f0f0;
+  100% {
+    transform: rotate(360deg);
   }
-   */
-  /* Road */
-  .road {
-    position: relative;
-    width: 100%;
-    height: 200px;
-    background-color: #333;
-    overflow: hidden;
-  }
-  
-  /* Car */
-  .car {
-    position: absolute;
-    bottom: 30px;
-    display: flex;
-    align-items: center;
-    left: var(--car-position, 15%); /* Add CSS variable for position */
-    transition: left 1s linear; /* Smooth transition */
-  }
-  
-  /* Car Body */
-  .car-body {
-    width: 120px;          /* Increased from 80px */
-    height: 60px;          /* Increased from 40px */
-    background-color: #007bff;
-    border-radius: 15px 15px 0 0;  /* Increased radius */
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 20px;       /* Increased from 12px */
-    font-weight: bold;
-    text-align: center;
-    padding: 8px;          /* Increased padding */
-  }
-  
-  /* Wheels */
-  .wheel {
-    width: 30px;           /* Increased from 20px */
-    height: 30px;          /* Increased from 20px */
-    background-color: #555;
-    border-radius: 50%;
-    position: absolute;
-    bottom: -15px;         /* Adjusted for larger wheels */
-  }
-  
-  /* Front Wheel */
-  .front-wheel {
-    right: 10px;
-    animation: wheel-spin 0.5s linear infinite;
-  }
-  
-  /* Back Wheel */
-  .back-wheel {
-    left: 10px;
-    animation: wheel-spin 0.5s linear infinite;
-  }
-  
-  /* Wheel Rotation */
-  @keyframes wheel-spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
+}

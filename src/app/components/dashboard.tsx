@@ -141,6 +141,54 @@ const Dashboard: React.FC = () => {
       <BaseStation />
       <div className="device-section"></div>
       <div className="charts-grid">
+      <div className="chart-card">
+          <div>
+            <Image
+              src={usrpB210Image.src}
+              alt="USRP B210"
+              className="device-image"
+              width={300}
+              height={200}
+              priority
+            />
+            <h2>USRP B210</h2>
+          </div>
+        </div>
+        <div className="chart-card">
+          <h2>
+            <i className="fas fa-wave-square"></i> USRP Current
+          </h2>
+          <GaugeChart
+            id="usrpData-current"
+            nrOfLevels={100}
+            arcsLength={[0.2, 0.4, 0.4]} // Adjust arcs to represent safe, moderate, and high current ranges
+            colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for mid, Red for high
+            percent={usrpCurrentPercent} // Use the calculated percentage value for the gauge
+            // percent={usrpData.current / maxUsrpCurrent} // Use the calculated percentage value for the gauge
+            formatTextValue={() => `${usrpData.current?.toFixed(2) || 0} mA`} // Display the actual current value
+            needleColor="#464A4F"
+            needleBaseColor="#464A4F"
+            textColor="#000000"
+            animate={false}
+          />
+        </div>
+        <div className="chart-card">
+          <h2>
+            <i className="fas fa-plug"></i> USRP Power Consumption
+          </h2>
+          <GaugeChart
+            id="usrpData-power"
+            nrOfLevels={100}
+            arcsLength={[0.3, 0.4, 0.3]} // Adjust arcs for low, medium, and high power consumption
+            colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for medium, Red for high
+            percent={usrpPowerPercent} // Use the calculated percentage value for the gauge
+            formatTextValue={() => `${usrpData.power?.toFixed(2) || 0} mW`} // Display the actual power consumption value
+            needleColor="#464A4F"
+            needleBaseColor="#464A4F"
+            textColor="#000000"
+            animate={false}
+          />
+        </div>
         <div className="chart-card">
           <div>
             <Image
@@ -190,54 +238,6 @@ const Dashboard: React.FC = () => {
               radarData.power / 16000 > 1 ? 0.95 : radarData.power / 16000
             } // Use the calculated percentage value for the gauge
             formatTextValue={() => `${radarData.power?.toFixed(2) || 0} mW`} // Display the actual power consumption value
-            needleColor="#464A4F"
-            needleBaseColor="#464A4F"
-            textColor="#000000"
-            animate={false}
-          />
-        </div>
-        <div className="chart-card">
-          <div>
-            <Image
-              src={usrpB210Image.src}
-              alt="USRP B210"
-              className="device-image"
-              width={300}
-              height={200}
-              priority
-            />
-            <h2>USRP B210</h2>
-          </div>
-        </div>
-        <div className="chart-card">
-          <h2>
-            <i className="fas fa-wave-square"></i> USRP Current
-          </h2>
-          <GaugeChart
-            id="usrpData-current"
-            nrOfLevels={100}
-            arcsLength={[0.2, 0.4, 0.4]} // Adjust arcs to represent safe, moderate, and high current ranges
-            colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for mid, Red for high
-            percent={usrpCurrentPercent} // Use the calculated percentage value for the gauge
-            // percent={usrpData.current / maxUsrpCurrent} // Use the calculated percentage value for the gauge
-            formatTextValue={() => `${usrpData.current?.toFixed(2) || 0} mA`} // Display the actual current value
-            needleColor="#464A4F"
-            needleBaseColor="#464A4F"
-            textColor="#000000"
-            animate={false}
-          />
-        </div>
-        <div className="chart-card">
-          <h2>
-            <i className="fas fa-plug"></i> USRP Power Consumption
-          </h2>
-          <GaugeChart
-            id="usrpData-power"
-            nrOfLevels={100}
-            arcsLength={[0.3, 0.4, 0.3]} // Adjust arcs for low, medium, and high power consumption
-            colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green for low, Yellow for medium, Red for high
-            percent={usrpPowerPercent} // Use the calculated percentage value for the gauge
-            formatTextValue={() => `${usrpData.power?.toFixed(2) || 0} mW`} // Display the actual power consumption value
             needleColor="#464A4F"
             needleBaseColor="#464A4F"
             textColor="#000000"
