@@ -5,10 +5,11 @@ import io from "socket.io-client";
 import GaugeChart from "react-gauge-chart";
 import { debounce } from "lodash";
 import Image from "next/image";
-import "../assets/css/dashboard.css";
-
 import awr1642Image from "../assets/images/radar.jpg";
 import usrpB210Image from "../assets/images/usrp.jpg";
+
+import "../assets/css/dashboard.css";
+import BaseStation from "./base-station";
 
 // const SOCKET_SERVER_URL = "http://localhost:3000";
 const SOCKET_SERVER_URL = "https://gauge-charts.onrender.com";
@@ -21,7 +22,6 @@ interface DeviceData {
 }
 
 const Dashboard: React.FC = () => {
-  const maxVoltage = 15;
   const [usrpCurrentPercent, setUsrpCurrentPercent] = useState(0.05);
   const [usrpPowerPercent, setUsrpPowerPercent] = useState(0.05);
   const [radarAccPowerPercent, setRadarAccPowerPercent] = useState(0.05);
@@ -138,48 +138,25 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <h1>Base Station Dashboard</h1>
-      <div className="device-section">
-        <div>
-          <p>AWR1642BOOST-ODS</p>
-          <Image
-            src={awr1642Image.src}
-            alt="AWR1642BOOST-ODS"
-            className="device-image"
-            width={300}
-            height={200}
-            priority
-          />
-        </div>
-        <div>
-          <p>USRP B210</p>
-          <Image
-            src={usrpB210Image.src}
-            alt="USRP B210"
-            className="device-image"
-            width={300}
-            height={200}
-            priority
-          />
-        </div>
-      </div>
+      <BaseStation />
+      <div className="device-section"></div>
       <div className="charts-grid">
         <div className="chart-card">
-          <h2>
-            <i className="fas fa-bolt"></i> Radar Voltage
-          </h2>
-          <GaugeChart
-            id="radarData-voltage"
-            nrOfLevels={100}
-            arcsLength={[0.2, 0.3, 0.5]} // Split into segments as needed
-            colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green, Yellow, Red
-            percent={radarData.voltage / maxVoltage} // Still using a percentage for fill
-            formatTextValue={() => `${radarData.voltage?.toFixed(2) || 0} V`} // Show real value as text
-            textColor="#000000"
-            needleColor="#464A4F"
-            needleBaseColor="#464A4F"
-            animate={false}
-          />
+          <div>
+            <Image
+              src={awr1642Image.src}
+              alt="AWR1642BOOST-ODS"
+              className="device-image"
+              width={300}
+              height={200}
+              priority
+              // style={{
+              //   backgroundColor: 'transparent',
+              //   objectFit: 'contain'
+              // }}
+            />
+            <h2>AWR1642BOOST-ODS</h2>
+          </div>
         </div>
         <div className="chart-card">
           <h2>
@@ -220,21 +197,17 @@ const Dashboard: React.FC = () => {
           />
         </div>
         <div className="chart-card">
-          <h2>
-            <i className="fas fa-bolt"></i> USRP Voltage
-          </h2>
-          <GaugeChart
-            id="usrpData-voltage"
-            nrOfLevels={100}
-            arcsLength={[0.2, 0.3, 0.5]} // Split into segments as needed
-            colors={["#00FF00", "#FFBF00", "#FF0000"]} // Green, Yellow, Red
-            percent={usrpData.voltage / maxVoltage} // Still using a percentage for fill
-            formatTextValue={() => `${usrpData.voltage?.toFixed(2) || 0} V`} // Show real value as text
-            textColor="#000000"
-            needleColor="#464A4F"
-            needleBaseColor="#464A4F"
-            animate={false}
-          />
+          <div>
+            <Image
+              src={usrpB210Image.src}
+              alt="USRP B210"
+              className="device-image"
+              width={300}
+              height={200}
+              priority
+            />
+            <h2>USRP B210</h2>
+          </div>
         </div>
         <div className="chart-card">
           <h2>
