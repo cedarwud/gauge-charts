@@ -1,10 +1,7 @@
-// /app/api/getDistance/route.js
 import mysql from "mysql2/promise";
 
 export async function GET(request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const count = searchParams.get("count");
     // Establish MySQL connection
     const connection = await mysql.createConnection({
       host: "localhost",
@@ -14,17 +11,13 @@ export async function GET(request) {
     });
 
     // Query the latest distance data
-    // const [rows] = await connection.execute(
-    //   "SELECT dist FROM radartousrp ORDER BY id DESC LIMIT 1"
-    // );
     const [rows] = await connection.execute(
-    //   "SELECT dist FROM radartousrp ORDER BY id DESC"
-      "SELECT dist FROM radartousrp ORDER BY id ASC"
+      "SELECT dist FROM radartousrp ORDER BY id DESC LIMIT 1"
     );
     connection.end();
 
     // return new Response(JSON.stringify({ distance: rows[0].dist }), {
-    return new Response(JSON.stringify({ distance: rows[count].dist }), {
+    return new Response(JSON.stringify({ distance: rows[0].dist }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -32,7 +25,7 @@ export async function GET(request) {
     });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Database query failed" }), {
+    return new Response(JSON.stringify({ distance: 0,error: "Database query failed" }), {
       status: 500,
       headers: {
         "Content-Type": "application/json",

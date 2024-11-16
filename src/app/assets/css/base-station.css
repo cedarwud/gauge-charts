@@ -1,20 +1,15 @@
 .base-station-root {
   display: flex;
+  h1  {
+    color: #456;
+    margin-top: 20px;
+  }
 }
 
 .base-station-road {
   position: relative;
   width: 260px;
   background-color: #fff;
-}
-
-.car-road {
-  position: relative;
-  width: 100%;
-  height: 280px;
-  background-color: #fff;
-  display: flex;
-  align-items: center;
 }
 
 .base-station {
@@ -50,15 +45,14 @@
   bottom: 50%;
   width: 149px;
   height: 157px;
-  transform: translateX(-37%) translateY(15%)
-    scale(calc(var(--gain-percentage)));
+  transform: translateX(-37%) translateY(15%) scale(calc(var(--gain-scale)));
   background-image: url("../images/power-left.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   z-index: 1;
   clip-path: circle(calc(var(--gain-percentage)) at right center);
-  opacity: calc(var(--gain-percentage));
+  opacity: calc(var(--gain-scale));
   transition: clip-path 0.3s ease;
 }
 
@@ -69,15 +63,33 @@
   bottom: 50%;
   width: 149px;
   height: 157px;
-  transform: translateX(45%) translateY(12%) scale(calc(var(--gain-percentage)));
+  transform: translateX(45%) translateY(12%) scale(calc(var(--gain-scale)));
   background-image: url("../images/power-right.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   z-index: 1;
   clip-path: circle(calc(var(--gain-percentage)) at left center);
-  opacity: calc(var(--gain-percentage));
+  opacity: calc(var(--gain-scale));
   transition: clip-path 0.3s ease;
+}
+
+.car {
+  user-select: none;
+  cursor: grab;
+}
+
+.car:active {
+  cursor: grabbing;
+}
+
+.car-road {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
 }
 
 /* Car */
@@ -101,7 +113,7 @@
   justify-content: center;
   align-items: center;
   color: white;
-  font-size: 20px; /* Increased from 12px */
+  font-size: 30px; /* Increased from 12px */
   font-weight: bold;
   text-align: center;
   padding: 8px; /* Increased padding */

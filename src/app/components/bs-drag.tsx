@@ -26,6 +26,14 @@ const BaseStation: React.FC = () => {
     return normalizedOutput;
   }
 
+  useEffect(() => {
+    setGain(() => {
+      const newGain = Math.floor(mapLogarithmically(distance * 100));
+      updateGain(newGain);
+      return newGain;
+    });
+  }, [distance]);
+
   const updateGain = (newGain) => {
     const powerLeft = document.querySelector(".power-left") as HTMLElement;
     const powerRight = document.querySelector(".power-right") as HTMLElement;
@@ -39,54 +47,42 @@ const BaseStation: React.FC = () => {
     }
   };
 
-  const updateCarPosition = (distance: number) => {
-    const car = document.querySelector(".car") as HTMLElement;
-    if (car) {
-      // Convert distance to percentage (assume max distance is 85)
-      const position = Math.min(Math.max((distance / 2.25) * 100, 0), 85);
-      car.style.setProperty("--car-position", `${position}%`);
-    }
+  const [isDragging, setIsDragging] = useState(false);
+  const carRef = useRef<HTMLDivElement>(null);
+  const roadRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
   };
 
-  // Add useRef for interval
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !carRef.current || !roadRef.current) return;
 
-  // Update useEffect with error handling
+    const roadRect = roadRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - roadRect.left;
+    const roadWidth = roadRect.width;
+
+    // Calculate position percentage (0-100)
+    let position = (mouseX / roadWidth) * 100;
+    position = Math.min(Math.max(position, 0), 85); // Limit to 0-85%
+
+    // Calculate actual distance (0-200m)
+    const distance = (position / 85) * 2;
+
+    carRef.current.style.setProperty("--car-position", `${position}%`);
+    setDistance(distance);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("/api/get-distance");
-        if (!res.ok) {
-          throw new Error("Database was not ok");
-        }
-        const data = await res.json();
-        setDistance(data.distance);
-        updateCarPosition(data.distance);
-        setGain(() => {
-          const newGain =
-            Math.floor(mapLogarithmically(data.distance * 100)) || 10;
-          updateGain(newGain);
-          return newGain;
-        });
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-        // Clear interval on error
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-      }
-    };
+    // Add mouse up listener to window to handle releases outside the component
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => window.removeEventListener("mouseup", handleMouseUp);
+  }, []);
 
-    // Store interval ID in ref
-    intervalRef.current = setInterval(fetchData, 1000);
-
-    // Cleanup on unmount
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []); // Empty dependency array if interval should only be set once
   return (
     <Fragment>
       <h1>整合感測和通訊下之雷達感測協助節能通訊系統</h1>
@@ -99,9 +95,14 @@ const BaseStation: React.FC = () => {
           </div>
           <h1>{gain}</h1>
         </div>
-        <div className="car-road">
-          <div className="car">
-            <div className="car-body">{distance?.toFixed(2) ?? "0.00"} m</div>
+        <div className="car-road" ref={roadRef} onMouseMove={handleMouseMove}>
+          <div
+            className="car"
+            ref={carRef}
+            onMouseDown={handleMouseDown}
+            style={{ cursor: isDragging ? "grabbing" : "grab" }}
+          >
+            <div className="car-body">{distance.toFixed(2)} m</div>
             <div className="wheel front-wheel"></div>
             <div className="wheel back-wheel"></div>
           </div>

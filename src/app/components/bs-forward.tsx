@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import "../assets/css/base-station.css";
 
 const BaseStation: React.FC = () => {
@@ -26,6 +26,22 @@ const BaseStation: React.FC = () => {
     return normalizedOutput;
   }
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setDistance((prev) => {
+        const newDistance = prev + 0.01 <= 2 ? prev + 0.01 : 2;
+        updateCarPosition(newDistance);
+        setGain(() => {
+          const newGain = Math.floor(mapLogarithmically(distance * 100));
+          updateGain(newGain);
+          return newGain;
+        });
+        return newDistance;
+      });
+    }, 100);
+    return () => clearInterval(intervalId);
+  }, [distance]);
+
   const updateGain = (newGain) => {
     const powerLeft = document.querySelector(".power-left") as HTMLElement;
     const powerRight = document.querySelector(".power-right") as HTMLElement;
@@ -48,45 +64,6 @@ const BaseStation: React.FC = () => {
     }
   };
 
-  // Add useRef for interval
-  const intervalRef = useRef<NodeJS.Timeout>();
-
-  // Update useEffect with error handling
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch("/api/get-distance");
-        if (!res.ok) {
-          throw new Error("Database was not ok");
-        }
-        const data = await res.json();
-        setDistance(data.distance);
-        updateCarPosition(data.distance);
-        setGain(() => {
-          const newGain =
-            Math.floor(mapLogarithmically(data.distance * 100)) || 10;
-          updateGain(newGain);
-          return newGain;
-        });
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-        // Clear interval on error
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-        }
-      }
-    };
-
-    // Store interval ID in ref
-    intervalRef.current = setInterval(fetchData, 1000);
-
-    // Cleanup on unmount
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []); // Empty dependency array if interval should only be set once
   return (
     <Fragment>
       <h1>整合感測和通訊下之雷達感測協助節能通訊系統</h1>
@@ -101,7 +78,7 @@ const BaseStation: React.FC = () => {
         </div>
         <div className="car-road">
           <div className="car">
-            <div className="car-body">{distance?.toFixed(2) ?? "0.00"} m</div>
+            <div className="car-body">{distance.toFixed(2)}m</div>
             <div className="wheel front-wheel"></div>
             <div className="wheel back-wheel"></div>
           </div>
