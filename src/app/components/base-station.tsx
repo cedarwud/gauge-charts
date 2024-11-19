@@ -3,9 +3,8 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import "../assets/css/base-station.css";
 
-const BaseStation: React.FC = () => {
+const BaseStation: React.FC = ({ gain, setGain }) => {
   const [distance, setDistance] = useState(0);
-  const [gain, setGain] = useState(10);
 
   function mapLogarithmically(input) {
     // 確保輸入在範圍 0 到 200 之間

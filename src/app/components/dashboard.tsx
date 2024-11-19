@@ -27,6 +27,7 @@ const Dashboard: React.FC = () => {
   const [radarAccPowerPercent, setRadarAccPowerPercent] = useState(0.05);
   const [usrpAccPowerPercent, setUsrpAccPowerPercent] = useState(0.05);
   const [totalAccPowerPercent, setTotalAccPowerPercent] = useState(0.05);
+  const [gain, setGain] = useState(10);
 
   const [radarData, setRadarData] = useState<DeviceData>({
     voltage: 0,
@@ -42,12 +43,31 @@ const Dashboard: React.FC = () => {
     accumulatedPower: 0,
   });
 
+  const calculateUsrpCurrent = (gain: number): number => {
+    let baseValue: number;
+    if (gain < 10 || gain > 90) {
+      baseValue = 501;
+    } else if (gain <= 50) {
+      baseValue = Math.floor(501 + ((gain - 10) / 40) * 3);
+    } else if (gain <= 60) {
+      baseValue = Math.floor(504 + ((gain - 50) / 10) * 2);
+    } else if (gain <= 70) {
+      baseValue = Math.floor(506 + ((gain - 60) / 10) * 5);
+    } else if (gain <= 80) {
+      baseValue = Math.floor(511 + ((gain - 70) / 10) * 18);
+    } else {
+      baseValue = Math.floor(529 + ((gain - 80) / 10) * 58);
+    }
+
+    return Number((baseValue + Math.random()).toFixed(2));
+  };
+
   const handleNewData = debounce((data) => {
-    const { radarData, usrpData } = data;
+    const { radarData } = data;
 
     setRadarData((prevData) => {
       const radarAccPowerPercent =
-        ((prevData.accumulatedPower + radarData.power) / 4000) * 0.01;
+        ((prevData.accumulatedPower + radarData.power) / 10000) * 0.01;
       const newRadarAccPowerPercent =
         radarAccPowerPercent > 1
           ? 0.95
@@ -61,9 +81,30 @@ const Dashboard: React.FC = () => {
         accumulatedPower: prevData.accumulatedPower + radarData.power,
       };
     });
+
+    const usrpCurrent = calculateUsrpCurrent(gain);
+    const usrpPower = usrpCurrent * 4.98;
+    const usrpCurrentPercent = (usrpData.current - 500) / 100;
+    const newUsrpCurrentPercent =
+      usrpCurrentPercent > 1
+        ? 0.95
+        : usrpCurrentPercent < 0
+        ? 0.05
+        : usrpCurrentPercent;
+    setUsrpCurrentPercent(newUsrpCurrentPercent);
+
+    const usrpPowerPercent = (usrpPower - 2500) / 500;
+    const newUsrpPowerPercent =
+      usrpPowerPercent > 1
+        ? 0.95
+        : usrpPowerPercent < 0
+        ? 0.05
+        : usrpPowerPercent;
+    setUsrpPowerPercent(newUsrpPowerPercent);
+
     setUsrpData((prevData) => {
       const usrpAccPowerPercent =
-        ((prevData.accumulatedPower + usrpData.power) / 1900) * 0.01;
+        ((prevData.accumulatedPower + usrpPower) / 10000) * 0.01;
       const newUsrpAccPowerPercent =
         usrpAccPowerPercent > 1
           ? 0.95
@@ -74,27 +115,11 @@ const Dashboard: React.FC = () => {
 
       return {
         ...usrpData,
-        accumulatedPower: prevData.accumulatedPower + usrpData.power,
+        current: usrpCurrent,
+        power: usrpPower,
+        accumulatedPower: prevData.accumulatedPower + usrpPower,
       };
     });
-
-    const usrpCurrentPercent = (usrpData.current - 500) / 100;
-    const newUsrpCurrentPercent =
-      usrpCurrentPercent > 1
-        ? 0.95
-        : usrpCurrentPercent < 0
-        ? 0.05
-        : usrpCurrentPercent;
-    setUsrpCurrentPercent(newUsrpCurrentPercent);
-
-    const usrpPowerPercent = (usrpData.power - 2500) / 500;
-    const newUsrpPowerPercent =
-      usrpPowerPercent > 1
-        ? 0.95
-        : usrpPowerPercent < 0
-        ? 0.05
-        : usrpPowerPercent;
-    setUsrpPowerPercent(newUsrpPowerPercent);
 
     const totalAccPowerPercent =
       (radarAccPowerPercent + usrpAccPowerPercent) / 3;
@@ -138,10 +163,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <BaseStation />
+      <BaseStation gain={gain} setGain={setGain} />
       <div className="device-section"></div>
       <div className="charts-grid">
-      <div className="chart-card">
+        <div className="chart-card">
           <div>
             <Image
               src={usrpB210Image.src}
