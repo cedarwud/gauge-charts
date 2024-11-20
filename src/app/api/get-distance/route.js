@@ -33,3 +33,58 @@ export async function GET(request) {
     });
   }
 }
+
+export async function POST(request) {
+  try {
+    // Parse request body to get distance
+    const body = await request.json();
+    const dist = parseFloat(body.distance);
+
+    // Generate random angles
+    const azimuth = Math.random() * 90;  // 0 to 360 degrees
+    const elevation = Math.random() * 90;  // -90 to 90 degrees
+
+    // Establish MySQL connection
+    const connection = await mysql.createConnection({
+      host: "localhost",
+      user: "root",
+      password: "1111",
+      database: "radarDb"
+    });
+
+    // Insert new data
+    const [result] = await connection.execute(
+      "INSERT INTO radartousrp (dist, azimuth, elevation) VALUES (?, ?, ?)",
+      [dist, azimuth.toFixed(2), elevation.toFixed(2)]
+    );
+    
+    connection.end();
+
+    return new Response(
+      JSON.stringify({ 
+        success: true,
+        distance: dist,
+        azimuth: azimuth.toFixed(2),
+        elevation: elevation.toFixed(2)
+      }), 
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+  } catch (error) {
+    console.error("Error:", error);
+    return new Response(
+      JSON.stringify({ success: false, error: error.message }), 
+      { 
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  }
+}
