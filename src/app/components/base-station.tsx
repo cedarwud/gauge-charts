@@ -42,7 +42,7 @@ const BaseStation: React.FC = ({ gain, setGain }) => {
     const car = document.querySelector(".car") as HTMLElement;
     if (car) {
       // Convert distance to percentage (assume max distance is 85)
-      const position = Math.min(Math.max((distance / 2.25) * 100, 0), 85);
+      const position = Math.min(Math.max((distance / 3.4) * 100, 0), 85);
       car.style.setProperty("--car-position", `${position}%`);
     }
   };

@@ -66,7 +66,7 @@ const BaseStation: React.FC = ({ gain, setGain }) => {
     position = Math.min(Math.max(position, 0), 85); // Limit to 0-85%
 
     // Calculate actual distance (0-200m)
-    const distance = (position / 85) * 2;
+    const distance = (position / 85) * 3;
 
     carRef.current.style.setProperty("--car-position", `${position}%`);
     setDistance(distance);
