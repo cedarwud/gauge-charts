@@ -4,15 +4,15 @@ export async function GET(request) {
   try {
     // Establish MySQL connection
     const connection = await mysql.createConnection({
-      host: "localhost",
+      host: "120.126.151.98",
       user: "root",
       password: "1111",
-      database: "radarDb",
+      database: "test",
     });
 
     // Query the latest distance data
     const [rows] = await connection.execute(
-      "SELECT dist FROM radartousrp ORDER BY id DESC LIMIT 1"
+      "SELECT dist FROM radarTOusrp ORDER BY id DESC LIMIT 1"
     );
     connection.end();
 
@@ -46,15 +46,15 @@ export async function POST(request) {
 
     // Establish MySQL connection
     const connection = await mysql.createConnection({
-      host: "localhost",
+      host: "120.126.151.98",
       user: "root",
       password: "1111",
-      database: "radarDb"
+      database: "test"
     });
 
     // Insert new data
     const [result] = await connection.execute(
-      "INSERT INTO radartousrp (dist, azimuth, elevation) VALUES (?, ?, ?)",
+      "INSERT INTO radarTOusrp (dist, azimuth, elevation) VALUES (?, ?, ?)",
       [dist, azimuth.toFixed(2), elevation.toFixed(2)]
     );
     
