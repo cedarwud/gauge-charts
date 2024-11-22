@@ -5,6 +5,8 @@ import "../assets/css/base-station.css";
 
 const BaseStation: React.FC = ({ gain, setGain }) => {
   const [distance, setDistance] = useState(0);
+  const [averageDistance, setAverageDistance] = useState(0);
+  const [mostFrequentDistance, setMostFrequentDistance] = useState(0);
 
   function mapLogarithmically(input) {
     // 確保輸入在範圍 0 到 200 之間
@@ -60,6 +62,8 @@ const BaseStation: React.FC = ({ gain, setGain }) => {
         }
         const data = await res.json();
         setDistance(data.distance);
+        setAverageDistance(data.averageDistance);
+        setMostFrequentDistance(data.mostFrequentDistance);
         updateCarPosition(data.distance);
         setGain(() => {
           const newGain =
@@ -77,7 +81,7 @@ const BaseStation: React.FC = ({ gain, setGain }) => {
     };
 
     // Store interval ID in ref
-    intervalRef.current = setInterval(fetchData, 1000);
+    intervalRef.current = setInterval(fetchData, 5000);
 
     // Cleanup on unmount
     return () => {
@@ -88,7 +92,17 @@ const BaseStation: React.FC = ({ gain, setGain }) => {
   }, []); // Empty dependency array if interval should only be set once
   return (
     <Fragment>
-      <h1>整合感測和通訊下之雷達感測協助節能通訊系統</h1>
+      {/* <h1>整合感測和通訊下之雷達感測協助節能通訊系統</h1> */}
+      <h1>
+        5秒內最新10筆資料
+        <br />
+        平均：{averageDistance}
+        <br />
+        次數最多：
+        {mostFrequentDistance}
+        <br />
+        最新一筆：{distance.toFixed(2)}
+      </h1>
       <div className="base-station-root">
         <div className="base-station-road">
           <div className="base-station">

@@ -133,33 +133,44 @@ const Dashboard: React.FC = () => {
   }, 1000);
 
   useEffect(() => {
-    // Use environment variable for the server URL, falling back to localhost for local development
-    const socket = io(SOCKET_SERVER_URL, {
-      transports: ["websocket", "polling"], // Allow both transports
-      secure: true, // Ensure secure connection
-    });
-
-    // Add the connect_error event listener to catch connection errors
-    socket.on("connect_error", (err) => {
-      console.error("Connection error:", err.message);
-    });
-
-    socket.on("error", (err) => {
-      console.error("Socket error:", err.message);
-    });
-
-    // socket.on("newData", handleNewData);
-
-    socket.on("newData", (receivedData) => {
-      console.log("Received data:", receivedData);
-      handleNewData(receivedData); // Update state with the received data
-    });
-
-    // Clean up the socket connection when the component unmounts
-    return () => {
-      socket.disconnect();
-    };
+    const radarPower = 4104.38 + Math.random();
+    handleNewData({
+      radarData: {
+        voltage: 0,
+        current: 815.5 + Math.random(),
+        power: radarPower,
+        accumulatedPower: radarPower,
+      },
+    }); // Update state with the received data
   }, [radarData, usrpData]);
+  // useEffect(() => {
+  //   // Use environment variable for the server URL, falling back to localhost for local development
+  //   const socket = io(SOCKET_SERVER_URL, {
+  //     transports: ["websocket", "polling"], // Allow both transports
+  //     secure: true, // Ensure secure connection
+  //   });
+
+  //   // Add the connect_error event listener to catch connection errors
+  //   socket.on("connect_error", (err) => {
+  //     console.error("Connection error:", err.message);
+  //   });
+
+  //   socket.on("error", (err) => {
+  //     console.error("Socket error:", err.message);
+  //   });
+
+  //   // socket.on("newData", handleNewData);
+
+  //   socket.on("newData", (receivedData) => {
+  //     console.log("Received data:", receivedData);
+  //     handleNewData(receivedData); // Update state with the received data
+  //   });
+
+  //   // Clean up the socket connection when the component unmounts
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, [radarData, usrpData]);
 
   return (
     <div className="dashboard-container">
