@@ -3,10 +3,11 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import "../assets/css/base-station.css";
 
-const BaseStation: React.FC = ({ gain, setGain }) => {
-  const [distance, setDistance] = useState(0);
+const VideoBasestation: React.FC = ({ gain, setGain }) => {
+  const [distance, setDistance] = useState(0.32);
   const [averageDistance, setAverageDistance] = useState(0);
   const [mostFrequentDistance, setMostFrequentDistance] = useState(0);
+  const [videoTime, setVideoTime] = useState(0);
 
   function mapLogarithmically(input) {
     // 確保輸入在範圍 0 到 200 之間
@@ -52,22 +53,37 @@ const BaseStation: React.FC = ({ gain, setGain }) => {
   // Add useRef for interval
   const intervalRef = useRef<NodeJS.Timeout>();
 
+  const videoDistance = [
+    "0.51",
+    "0.83",
+    "1.02",
+    "1.26",
+    "1.58",
+    "1.86",
+    "2.03",
+    "2.31",
+    "2.58",
+    "2.85",
+    "2.43",
+    "1.98",
+    "1.54",
+    "1.13",
+    "0.86",
+    "0.65",
+    "0.48",
+  ];
+  console.log(videoTime, videoDistance[videoTime]);
   // Update useEffect with error handling
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("/api/get-distance");
-        if (!res.ok) {
-          throw new Error("Database was not ok");
-        }
-        const data = await res.json();
-        setDistance(data.distance);
-        setAverageDistance(data.averageDistance);
-        setMostFrequentDistance(data.mostFrequentDistance);
-        updateCarPosition(data.distance);
+        setDistance(+videoDistance[videoTime] || 0.48);
+        updateCarPosition(+videoDistance[videoTime] || 0.48);
+        setVideoTime((prev) => prev + 1);
         setGain(() => {
           const newGain =
-            Math.floor(mapLogarithmically(data.distance * 100)) || 10;
+            Math.floor(mapLogarithmically(+videoDistance[videoTime] * 100)) ||
+            10;
           updateGain(newGain);
           return newGain;
         });
@@ -89,20 +105,10 @@ const BaseStation: React.FC = ({ gain, setGain }) => {
         clearInterval(intervalRef.current);
       }
     };
-  }, []); // Empty dependency array if interval should only be set once
+  }, [videoTime]); // Empty dependency array if interval should only be set once
   return (
     <Fragment>
       <h1>整合感測和通訊下之雷達感測協助節能通訊系統</h1>
-      {/* <h1>
-        5秒內最新10筆資料
-        <br />
-        平均：{averageDistance}
-        <br />
-        次數最多：
-        {mostFrequentDistance}
-        <br />
-        最新一筆：{distance.toFixed(2)}
-      </h1> */}
       <div className="base-station-root">
         <div className="base-station-road">
           <div className="base-station">
@@ -124,4 +130,4 @@ const BaseStation: React.FC = ({ gain, setGain }) => {
   );
 };
 
-export default BaseStation;
+export default VideoBasestation;
