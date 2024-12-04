@@ -81,7 +81,7 @@ const BaseStation: React.FC = ({ gain, setGain }) => {
     };
 
     // Store interval ID in ref
-    intervalRef.current = setInterval(fetchData, 5000);
+    intervalRef.current = setInterval(fetchData, 3000);
 
     // Cleanup on unmount
     return () => {
